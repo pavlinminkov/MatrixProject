@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <iomanip>
 
 using namespace std;
 
@@ -14,6 +15,17 @@ bool stringIsMadeOfWhiteSpaces(string line)
         }
     }
     return true;
+}
+
+int doubleLength(double num)
+{
+    string doubleStr = to_string(num);
+    doubleStr.erase(doubleStr.find_last_not_of('0') + 1, string::npos);
+    if (doubleStr.back() == '.')
+    {
+        return doubleStr.size() - 1;
+    }
+    return doubleStr.size();
 }
 
 int colCount(string row)
@@ -90,6 +102,7 @@ void calculateOperation(string operation[101], int lineCount)
         }
     }
 
+    //Operations with two or one arrays
     if (firstLine[operatorIndex] == ' ')
     {
         int rowCount1 = 0;
@@ -142,25 +155,162 @@ void calculateOperation(string operation[101], int lineCount)
             parseString(rows2[i], array2[i], rowCount2, colCount2);
         }
 
+        //Multiply matrix with matrix
         if (firstLine[operatorIndex] == 'X')
         {
+            if (colCount1 != rowCount2)
+            {
+                operation[0] += " = Error";
+                for (int i = 0; i < lineCount; i++)
+                {
+                    cout << operation[i] << endl;
+                }
+            }
+
+            else
+            {
+                double resultArr[rowCount1][colCount2];
+                int maxLengthsPerCol[colCount2];
+                for (int i = 0; i < colCount2; i++)
+                {
+                    maxLengthsPerCol[i] = 0;
+                }
+
+                for (int i = 0; i < rowCount1; i++)
+                {
+                    for (int j = 0; j < colCount2; j++)
+                    {
+                        resultArr[i][j] = 0;
+                        for (int z = 0; z < colCount1; z++)
+                        {
+                            double result = array1[i][z] * array2[z][j];
+                            resultArr[i][j] += result;
+                            int length = doubleLength(resultArr[i][j]);
+                            if (length > maxLengthsPerCol[j])
+                            {
+                                maxLengthsPerCol[j] = length;
+                            }
+                        }
+                    }
+                }
+
+                for (int i = 0; i < rowCount1; i++)
+                {
+                    cout << operation[i];
+                    if (i == 0)
+                    {
+                        cout << " = ";
+                    }
+                    else
+                    {
+                        cout << "   ";
+                    }
+
+                    if (i > rowCount2 - 1)
+                    {
+                        int spaceCount = operation[0].size() - operation[i].size();
+                        for (int j = 0; j < spaceCount; j++)
+                        {
+                            cout << ' ';
+                        }
+                    }
+
+                    cout << '|';
+                    for (int j = 0; j < colCount2; j++)
+                    {
+                        cout << setw(maxLengthsPerCol[j]) << resultArr[i][j];
+                        if (j != colCount2 - 1)
+                        {
+                            cout << " ";
+                        }
+                    }
+                    cout << '|' << endl;
+                }
+            }
+
+            return;
         }
-        else if (firstLine[operatorIndex] == '+')
+
+        //Sum matrix with matrix
+        if (firstLine[operatorIndex] == '+')
         {
+            if (colCount1 != colCount2 || rowCount1 != rowCount2)
+            {
+                operation[0] += " = Error";
+                for (int i = 0; i < lineCount; i++)
+                {
+                    cout << operation[i] << endl;
+                }
+                return;
+            }
+
+            double resultArr[rowCount1][colCount1];
+            int maxLengthsPerCol[colCount1];
+            for (int i = 0; i < colCount1; i++)
+            {
+                maxLengthsPerCol[i] = 0;
+            }
+
+            for (int i = 0; i < rowCount1; i++)
+            {
+                for (int j = 0; j < colCount1; j++)
+                {
+                    double result = array1[i][j] + array2[i][j];
+                    int resLength = doubleLength(result);
+                    if (resLength > maxLengthsPerCol[j])
+                    {
+                        maxLengthsPerCol[j] = resLength;
+                    }
+                    resultArr[i][j] = result;
+                }
+            }
+
+            for (int i = 0; i < rowCount1; i++)
+            {
+                cout << operation[i];
+                if (i == 0)
+                {
+                    cout << " = ";
+                }
+                else
+                {
+                    cout << "   ";
+                }
+
+                cout << '|';
+                for (int j = 0; j < colCount2; j++)
+                {
+                    cout << setw(maxLengthsPerCol[j]) << resultArr[i][j];
+                    if (j != colCount2 - 1)
+                    {
+                        cout << " ";
+                    }
+                }
+                cout << '|' << endl;
+            }
+
+            return;
         }
-        else
+
+        //Wrong operator
         {
-            //Error
+            operation[0] += " = Error";
+            for (int i = 0; i < lineCount; i++)
+            {
+                cout << operation[i] << endl;
+            }
+            return;
         }
     }
     else
     {
         int rowCount1 = lineCount;
         string rows[rowCount1];
-        for (int i; i < rowCount1; i++)
+        for (int i = 0; i < rowCount1; i++)
         {
             rows[i] = operation[i].substr(1);
             string tempRow;
+
             for (int j = 0; j < rows[i].size(); j++)
             {
                 if (rows[i][j] != '|')
@@ -184,37 +334,132 @@ void calculateOperation(string operation[101], int lineCount)
             parseString(rows[i], array[i], rowCount1, colCount1);
         }
 
-        for (int i = 0; i < rowCount1; i++)
+        //Multiplication with a number
+        if (firstLine[operatorIndex] == 'X')
         {
-            for (int j = 0; j < colCount1; j++)
+            double num = stod(firstLine.substr(operatorIndex + 1));
+            int maxLenghtsPerCol[colCount1];
+            for (int i = 0; i < colCount1; i++)
             {
-                cout << array[i][j] << ' ';
+                maxLenghtsPerCol[i] = 0;
             }
-            cout << endl;
-        }
-        
 
-        switch (firstLine[operatorIndex])
-        {
-        case 'X':
-            //Multiply with number
-            break;
-        case 'D':
-            //Determinant
-            break;
-        case '/':
-            //Divide by num
-            break;
-        case 'T':
-            //Transpolate
-            break;
-        case 'i':
-            //Reverse
-            break;
-        default:
-            //Add Error
-            break;
+            for (int i = 0; i < rowCount1; i++)
+            {
+                for (int j = 0; j < colCount1; j++)
+                {
+                    array[i][j] *= num;
+                    int numLength = doubleLength(array[i][j] * num);
+                    if (numLength > maxLenghtsPerCol[j])
+                    {
+                        maxLenghtsPerCol[j] = numLength;
+                    }
+                }
+            }
+
+            for (int i = 0; i < rowCount1; i++)
+            {
+                cout << operation[i];
+                if (i == 0)
+                {
+                    cout << " = |";
+                }
+                else
+                {
+                    for (int j = 0; j <= firstLine.substr(operatorIndex + 1).size(); j++)
+                    {
+                        cout << ' ';
+                    }
+                    cout << "   |";
+                }
+
+                for (int j = 0; j < colCount1; j++)
+                {
+                    cout << setw(maxLenghtsPerCol[j]) << array[i][j];
+                    if (j < colCount1 - 1)
+                    {
+                        cout << ' ';
+                    }
+                }
+
+                cout << '|' << endl;
+            }
+
+            return;
         }
+
+        //Division with a number
+        if (firstLine[operatorIndex] == '/')
+        {
+            double num = stod(firstLine.substr(operatorIndex + 1));
+            int maxLenghtsPerCol[colCount1];
+            for (int i = 0; i < colCount1; i++)
+            {
+                maxLenghtsPerCol[i] = 0;
+            }
+
+            for (int i = 0; i < rowCount1; i++)
+            {
+                for (int j = 0; j < colCount1; j++)
+                {
+                    array[i][j] /= num;
+                    int numLength = doubleLength(array[i][j] / num);
+                    if (numLength > maxLenghtsPerCol[j])
+                    {
+                        maxLenghtsPerCol[j] = numLength;
+                    }
+                }
+            }
+
+            for (int i = 0; i < rowCount1; i++)
+            {
+                cout << operation[i];
+                if (i == 0)
+                {
+                    cout << " = |";
+                }
+                else
+                {
+                    for (int j = 0; j <= firstLine.substr(operatorIndex + 1).size(); j++)
+                    {
+                        cout << ' ';
+                    }
+                    cout << "   |";
+                }
+
+                for (int j = 0; j < colCount1; j++)
+                {
+                    cout << setw(maxLenghtsPerCol[j]) << array[i][j];
+                    if (j < colCount1 - 1)
+                    {
+                        cout << ' ';
+                    }
+                }
+
+                cout << '|' << endl;
+            }
+
+            return;
+        }
+
+        //Determinant
+        if (firstLine[operatorIndex] == 'D')
+        {
+            return;
+        }
+
+        //Transpose
+        if (firstLine[operatorIndex] == 'T')
+        {
+            return;
+        }
+
+        //Reversed matrix
+        if (firstLine[operatorIndex] == 'i')
+        {
+            return;
+        }
+
     }
 }
 
@@ -229,6 +474,7 @@ void readOperations(string lines[101], int lineCount)
         if (stringIsMadeOfWhiteSpaces(lines[i]))
         {
             calculateOperation(currenOperation, operationLineCount);
+            cout << endl;
 
             for (int j = 0; j < 100; j++)
             {
