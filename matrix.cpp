@@ -17,6 +17,26 @@ bool stringIsMadeOfWhiteSpaces(string line)
     return true;
 }
 
+int findOperatorIndex(string line)
+{
+    int borderCount = 0;
+    int operatorIndex = 0;
+    for (char a : line)
+    {
+        if (a == '|')
+        {
+            borderCount++;
+        }
+        operatorIndex++;
+        if (borderCount == 2)
+        {
+            break;
+        }
+    }
+
+    return operatorIndex;
+}
+
 int doubleLength(double num)
 {
     string doubleStr = to_string(num);
@@ -84,23 +104,167 @@ void readFile(string lines[100], int &lineCount)
     }
 }
 
+void multiplyMatrixWithNum(double **&array, int rowCount, int colCount, int operatorIndex, string operation[])
+{
+    string firstLine = operation[0];
+    double num = stod(firstLine.substr(operatorIndex + 1));
+    int maxLengthsPerCol[colCount];
+    for (int i = 0; i < colCount; i++)
+    {
+        maxLengthsPerCol[i] = 0;
+    }
+
+    for (int i = 0; i < rowCount; i++)
+    {
+        for (int j = 0; j < colCount; j++)
+        {
+            int numLength = doubleLength(array[i][j] *= num);
+            if (numLength > maxLengthsPerCol[j])
+            {
+                maxLengthsPerCol[j] = numLength;
+            }
+        }
+    }
+
+    for (int i = 0; i < rowCount; i++)
+    {
+        cout << operation[i];
+        if (i == 0)
+        {
+            cout << " = |";
+        }
+        else
+        {
+            for (int j = 0; j <= firstLine.substr(operatorIndex + 1).size(); j++)
+            {
+                cout << ' ';
+            }
+            cout << "   |";
+        }
+
+        for (int j = 0; j < colCount; j++)
+        {
+            cout << setw(maxLengthsPerCol[j]) << array[i][j];
+            if (j < colCount - 1)
+            {
+                cout << ' ';
+            }
+        }
+
+        cout << '|' << endl;
+    }
+}
+
+void divideMatrixByNum(double **&array, int rowCount, int colCount, int operatorIndex, string operation[])
+{
+    string firstLine = operation[0];
+    double num = stod(firstLine.substr(operatorIndex + 1));
+    int maxLengthsPerCol[colCount];
+    for (int i = 0; i < colCount; i++)
+    {
+        maxLengthsPerCol[i] = 0;
+    }
+
+    for (int i = 0; i < rowCount; i++)
+    {
+        for (int j = 0; j < colCount; j++)
+        {
+            int numLength = doubleLength(array[i][j] /= num);
+            if (numLength > maxLengthsPerCol[j])
+            {
+                maxLengthsPerCol[j] = numLength;
+            }
+        }
+    }
+
+    for (int i = 0; i < rowCount; i++)
+    {
+        cout << operation[i];
+        if (i == 0)
+        {
+            cout << " = |";
+        }
+        else
+        {
+            for (int j = 0; j <= firstLine.substr(operatorIndex + 1).size(); j++)
+            {
+                cout << ' ';
+            }
+            cout << "   |";
+        }
+
+        for (int j = 0; j < colCount; j++)
+        {
+            cout << setw(maxLengthsPerCol[j]) << array[i][j];
+            if (j < colCount - 1)
+            {
+                cout << ' ';
+            }
+        }
+
+        cout << '|' << endl;
+    }
+}
+
+void transposeMatrix(double **&array, int rowCount, int colCount, string operation[])
+{
+    int maxLengthsPerCol[rowCount];
+    for (int i = 0; i < rowCount; i++)
+    {
+        maxLengthsPerCol[i] = 0;
+    }
+
+    for (int i = 0; i < rowCount; i++)
+    {
+        for (int j = 0; j < colCount; j++)
+        {
+            int numLength = doubleLength(array[i][j]);
+            if (maxLengthsPerCol[i] < numLength)
+            {
+                maxLengthsPerCol[i] = numLength;
+            }
+        }
+    }
+
+    for (int i = 0; i < colCount; i++)
+    {
+        if(i+1 > rowCount)
+        {
+            for (int j = 0; j < operation[0].size() - 1; j++)
+            {
+                cout << ' ';
+            }
+            
+        }
+
+        cout << operation[i];
+
+        if (i == 0)
+        {
+            cout << " = |";
+        }
+        else
+        {
+            cout << "    |";
+        }
+
+        for (int j = 0; j < rowCount; j++)
+        {
+            cout << setw(maxLengthsPerCol[j]) << array[j][i];
+            if (j < rowCount - 1)
+            {
+                cout << ' ';
+            }
+        }
+
+        cout << '|' << endl;
+    }
+}
+
 void calculateOperation(string operation[101], int lineCount)
 {
     string firstLine = operation[0];
-    int borderCount = 0;
-    int operatorIndex = 0;
-    for (char a : firstLine)
-    {
-        if (a == '|')
-        {
-            borderCount++;
-        }
-        operatorIndex++;
-        if (borderCount == 2)
-        {
-            break;
-        }
-    }
+    int operatorIndex = findOperatorIndex(firstLine);
 
     //Operations with two or one arrays
     if (firstLine[operatorIndex] == ' ')
@@ -327,7 +491,13 @@ void calculateOperation(string operation[101], int lineCount)
         }
         int colCount1 = colCount(rows[0]);
 
-        double array[rowCount1][colCount1];
+        double **array;
+
+        array = new double *[rowCount1];
+        for (int i = 0; i < rowCount1; ++i)
+        {
+            array[i] = new double[colCount1];
+        }
 
         for (int i = 0; i < rowCount1; i++)
         {
@@ -337,129 +507,37 @@ void calculateOperation(string operation[101], int lineCount)
         //Multiplication with a number
         if (firstLine[operatorIndex] == 'X')
         {
-            double num = stod(firstLine.substr(operatorIndex + 1));
-            int maxLenghtsPerCol[colCount1];
-            for (int i = 0; i < colCount1; i++)
-            {
-                maxLenghtsPerCol[i] = 0;
-            }
-
-            for (int i = 0; i < rowCount1; i++)
-            {
-                for (int j = 0; j < colCount1; j++)
-                {
-                    array[i][j] *= num;
-                    int numLength = doubleLength(array[i][j] * num);
-                    if (numLength > maxLenghtsPerCol[j])
-                    {
-                        maxLenghtsPerCol[j] = numLength;
-                    }
-                }
-            }
-
-            for (int i = 0; i < rowCount1; i++)
-            {
-                cout << operation[i];
-                if (i == 0)
-                {
-                    cout << " = |";
-                }
-                else
-                {
-                    for (int j = 0; j <= firstLine.substr(operatorIndex + 1).size(); j++)
-                    {
-                        cout << ' ';
-                    }
-                    cout << "   |";
-                }
-
-                for (int j = 0; j < colCount1; j++)
-                {
-                    cout << setw(maxLenghtsPerCol[j]) << array[i][j];
-                    if (j < colCount1 - 1)
-                    {
-                        cout << ' ';
-                    }
-                }
-
-                cout << '|' << endl;
-            }
-
-            return;
+            multiplyMatrixWithNum(array, rowCount1, colCount1, operatorIndex, operation);
         }
 
         //Division with a number
         if (firstLine[operatorIndex] == '/')
         {
-            double num = stod(firstLine.substr(operatorIndex + 1));
-            int maxLenghtsPerCol[colCount1];
-            for (int i = 0; i < colCount1; i++)
-            {
-                maxLenghtsPerCol[i] = 0;
-            }
-
-            for (int i = 0; i < rowCount1; i++)
-            {
-                for (int j = 0; j < colCount1; j++)
-                {
-                    array[i][j] /= num;
-                    int numLength = doubleLength(array[i][j] / num);
-                    if (numLength > maxLenghtsPerCol[j])
-                    {
-                        maxLenghtsPerCol[j] = numLength;
-                    }
-                }
-            }
-
-            for (int i = 0; i < rowCount1; i++)
-            {
-                cout << operation[i];
-                if (i == 0)
-                {
-                    cout << " = |";
-                }
-                else
-                {
-                    for (int j = 0; j <= firstLine.substr(operatorIndex + 1).size(); j++)
-                    {
-                        cout << ' ';
-                    }
-                    cout << "   |";
-                }
-
-                for (int j = 0; j < colCount1; j++)
-                {
-                    cout << setw(maxLenghtsPerCol[j]) << array[i][j];
-                    if (j < colCount1 - 1)
-                    {
-                        cout << ' ';
-                    }
-                }
-
-                cout << '|' << endl;
-            }
-
-            return;
+            divideMatrixByNum(array, rowCount1, colCount1, operatorIndex, operation);
         }
 
         //Determinant
         if (firstLine[operatorIndex] == 'D')
         {
-            return;
         }
 
         //Transpose
         if (firstLine[operatorIndex] == 'T')
         {
-            return;
+            transposeMatrix(array, rowCount1, colCount1, operation);
         }
 
         //Reversed matrix
         if (firstLine[operatorIndex] == 'i')
         {
-            return;
         }
 
+        //Frees memory from pointer
+        for (int i = 0; i < rowCount1; ++i)
+        {
+            delete[] array[i];
+        }
+        delete[] array;
     }
 }
 
