@@ -77,8 +77,8 @@ void parseString(string row, double array[], int rows, int cols)
     {
         if (row[i] != ' ')
         {
-            int j;
-            for (j = i; row[j] != ' ' && j < row.size(); j++)
+            int j = i;
+            for (j; row[j] != ' ' && j < row.size(); j++)
                 ;
             array[currentNumIndex] = stod(row.substr(i, j - i));
             currentNumIndex++;
@@ -101,6 +101,15 @@ void readFile(string lines[100], int &lineCount)
     while (getline(matrixFile, lines[lineCount]))
     {
         lineCount++;
+    }
+}
+
+void displayError(string operation[], int rowCount)
+{
+    cout << operation[0] << " = Error" << endl;
+    for (int i = 1; i < rowCount; i++)
+    {
+        cout << operation[i] << endl;
     }
 }
 
@@ -228,13 +237,12 @@ void transposeMatrix(double **&array, int rowCount, int colCount, string operati
 
     for (int i = 0; i < colCount; i++)
     {
-        if(i+1 > rowCount)
+        if (i + 1 > rowCount)
         {
             for (int j = 0; j < operation[0].size() - 1; j++)
             {
                 cout << ' ';
             }
-            
         }
 
         cout << operation[i];
@@ -259,6 +267,91 @@ void transposeMatrix(double **&array, int rowCount, int colCount, string operati
 
         cout << '|' << endl;
     }
+}
+
+void calculateAjungated(double **&array, int rowCount, int row, int column, double **&result)
+{
+    int tempColIndex = 0;
+    int tempRowIndex = 0;
+
+    for (int j = 0; j < rowCount; j++)
+    {
+        tempColIndex = 0;
+
+        for (int k = 0; k < rowCount; k++)
+        {
+            if (j != row && k != column)
+            {
+                result[tempRowIndex][tempColIndex] = array[j][k];
+                tempColIndex++;
+            }
+        }
+
+        if (j != row)
+        {
+            tempRowIndex++;
+        }
+    }
+}
+
+double determinant(double **&array, int rowCount)
+{
+    if (rowCount == 2)
+    {
+        return array[0][0] * array[1][1] - array[0][1] * array[1][0];
+    }
+    if (rowCount == 3)
+    {
+        return array[0][0] * array[1][1] * array[2][2] + array[0][1] * array[1][2] * array[2][0] + array[0][2] * array[1][0] * array[2][1] - (array[2][0] * array[1][1] * array[0][2] + array[2][1] * array[1][2] * array[0][0] + array[2][2] * array[1][0] * array[0][1]);
+    }
+
+    int tempRowCount = rowCount - 1;
+    double **tempArray;
+    tempArray = new double *[tempRowCount];
+    for (int i = 0; i < tempRowCount; ++i)
+    {
+        tempArray[i] = new double[tempRowCount];
+    }
+
+    double tempDeterminant = 0;
+
+    for (int i = 0; i < rowCount; i++)
+    {
+        calculateAjungated(array, rowCount, 0, i, tempArray);
+
+        if (i % 2 == 0)
+        {
+            tempDeterminant += array[0][i] * determinant(tempArray, tempRowCount);
+        }
+        else
+        {
+            tempDeterminant -= array[0][i] * determinant(tempArray, tempRowCount);
+        }
+    }
+
+    for (int i = 0; i < tempRowCount; ++i)
+    {
+        delete[] tempArray[i];
+    }
+    delete[] tempArray;
+
+    return tempDeterminant;
+}
+
+void calculateDeterminant(double **&array, int rowCount, int colCount, string operation[])
+{
+    if (rowCount != colCount)
+    {
+        displayError(operation, rowCount);
+        return;
+    }
+
+    cout << operation[0] << " = " << determinant(array, rowCount) << endl;
+    for (int i = 1; i < rowCount; i++)
+    {
+        cout << operation[i] << endl;
+    }
+    
 }
 
 void calculateOperation(string operation[101], int lineCount)
@@ -519,6 +612,7 @@ void calculateOperation(string operation[101], int lineCount)
         //Determinant
         if (firstLine[operatorIndex] == 'D')
         {
+            calculateDeterminant(array, rowCount1, colCount1, operation);
         }
 
         //Transpose
