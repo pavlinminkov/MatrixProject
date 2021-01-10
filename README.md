@@ -8,7 +8,7 @@ Simple matrix calculator which aims to simplify some of the basic calculations f
 * Warnings
 
 ## How to use
-Write out the matrices in a text file like shown below. You can leave as many spaces as you want between numbers but make sure that the lines are straight and the amount of numbers is the same in each row. After the matrix leave a space and then write the operator if you want to work with two matrices or don't leave a space and just write out the operator if you plan to work with on matrix. There will be more examples int the showcase of the operations. You can write out as many operations as you want, as long as you seperate each one with an Enter and the file doesn't get longer than 100 lines. After you are ready with the file save it in the directory of matrix.cpp, compile the program with GCC and write the name of the file in the console when you are asked to do so. All operations will be printed out in the console. You can use the include file.txt to test out the program.
+Write out the matrices in a text file like shown below. You can leave as many spaces as you want between numbers but make sure that the lines are straight and the amount of numbers is the same in each row. After the matrix leaves a space and then write the operator if you want to work with two matrices or don't leave a space and just write out the operator if you plan to work with on matrix. There will be more examples in the showcase of the operations. You can write out as many operations as you want, as long as you separate each one with an Enter and the file doesn't get longer than 100 lines. After you are ready with the file save it in the directory of matrix.cpp, compile the program with GCC, and write the name of the file in the console when you are asked to do so. All operations will be printed out in the console. You can use the included file.txt to test out the program.
 
 ### Examples:
 
@@ -98,7 +98,7 @@ Write out the matrices in a text file like shown below. You can leave as many sp
 |3 9 2 4|
 ```
 
-## Warning
+## Warnings
 * Don't leave unnecessary empty spaces.
 * Don't write out matrices with uneven borders.
 * Don't try to use files with over 100 lines.
