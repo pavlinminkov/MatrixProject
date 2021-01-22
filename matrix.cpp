@@ -654,10 +654,11 @@ void inverseMatrix(double **&array, int rowCount, int colCount, string operation
     //If the determinant is 0 there is no inverse matrix
     if (arrDeterminant == 0)
     {
-        cout << operation[0] << " - Matrix doesn't have an inverse matrix.";
+        cout << operation[0] << " - Matrix doesn't have an inverse matrix." << endl;
         for (int i = 1; i < rowCount; i++)
         {
             cout << operation[i];
+            cout << endl;
         }
         return;
     }
